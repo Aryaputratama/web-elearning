@@ -104,13 +104,13 @@ export default function App() {
           {/* Menu Desktop */}
           <nav className="hidden md:flex items-center gap-8">
             <a href="#tutorial-video" className="text-sm font-medium text-slate-700 hover:text-amber-600 transition-colors" data-testid="nav-video">
-              🎥 Video Tutorial
+              🎥 Video Tutorial (5 Video)
             </a>
             <a href="#download-section" className="text-sm font-medium text-slate-900 font-semibold bg-amber-500/10 px-4 py-2 rounded-xl text-amber-800 border border-amber-500/30" data-testid="nav-sumber-daya">
               📥 Unduh Template (.rar)
             </a>
             <a href="#kontak-arya" className="text-sm font-medium text-slate-700 hover:text-amber-600 transition-colors" data-testid="nav-kontak">
-              💬 Tanya Kak Arya
+              💬 Tanya Kak Arya (08111188644)
             </a>
           </nav>
 
@@ -140,7 +140,7 @@ export default function App() {
         {/* Menu Dropdown Mobile */}
         {mobileMenuOpen && (
           <div className="md:hidden bg-[#FDFBF7] border-b border-amber-950/10 px-6 py-6 flex flex-col gap-4">
-            <a href="#tutorial-video" onClick={() => setMobileMenuOpen(false)} className="text-base font-medium text-slate-800">🎥 Video Tutorial</a>
+            <a href="#tutorial-video" onClick={() => setMobileMenuOpen(false)} className="text-base font-medium text-slate-800">🎥 5 Video Tutorial</a>
             <a href="#download-section" onClick={() => setMobileMenuOpen(false)} className="text-base font-semibold text-amber-700">📥 Unduh Template .rar</a>
             <a href="#kontak-arya" onClick={() => setMobileMenuOpen(false)} className="text-base font-medium text-slate-800">💬 Tanya Kak Arya</a>
             <a 
@@ -170,7 +170,7 @@ export default function App() {
                 Dari nol di MS Word ke <span className="text-amber-600 underline decoration-amber-300 decoration-wavy decoration-2">CV & Cover Letter</span> siap kerja.
               </h1>
               <p className="text-lg text-slate-600 mb-8 leading-relaxed max-w-2xl">
-                Belajar langkah demi langkah melalui 5 video tutorial YouTube interaktif, lalu unduh langsung paket template arsip <code className="px-2 py-0.5 rounded bg-amber-100 text-amber-800 font-mono text-sm">.rar</code> untuk menyusun CV profesionalmu.
+                Belajar langkah demi langkah melalui <strong className="text-slate-900">5 video tutorial YouTube</strong> interaktif di bawah, lalu unduh langsung paket template arsip <code className="px-2 py-0.5 rounded bg-amber-100 text-amber-800 font-mono text-sm">.rar</code> untuk menyusun CV profesionalmu.
               </p>
 
               <div className="flex flex-wrap gap-4" id="download-section">
@@ -268,26 +268,26 @@ export default function App() {
         </div>
       </section>
 
-      {/* Bagian Tutorial 5 Video YouTube */}
+      {/* Bagian Tutorial 5 Video YouTube (Diletakkan PALING MENONJOL di atas) */}
       <section id="tutorial-video" className="py-24 max-w-7xl mx-auto px-6">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-600 text-xs font-bold mb-4">
-            <Video className="w-4 h-4" />
-            <span>5 VIDEO TUTORIAL YOUTUBE RESMI</span>
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-500/10 border border-red-500/30 text-red-600 text-sm font-extrabold mb-4 shadow-sm">
+            <Video className="w-5 h-5" />
+            <span>5 VIDEO TUTORIAL YOUTUBE PEMBUATAN CV & COVER LETTER</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight mb-4">
-            Belajar Bikin CV & Cover Letter Step-by-Step
+          <h2 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight mb-4">
+            Tonton & Pelajari 5 Video Panduan Ini
           </h2>
-          <p className="text-slate-600 text-base">
-            Klik salah satu video di bawah untuk langsung menonton tutorialnya di YouTube atau putar langsung di sini. Sangat mudah diikuti oleh pemula!
+          <p className="text-slate-600 text-lg">
+            Pilih video di bawah ini untuk memutar langsung di pemutar web atau buka langsung di YouTube. Sangat mudah dipahami!
           </p>
         </div>
 
         {/* Video Player Display */}
-        <div className="mb-12 p-6 rounded-3xl bg-slate-900 text-white shadow-2xl border border-amber-500/30">
+        <div className="mb-12 p-6 sm:p-8 rounded-3xl bg-slate-900 text-white shadow-2xl border-2 border-amber-500/40">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             <div className="lg:col-span-7">
-              <div className="relative aspect-video rounded-2xl overflow-hidden bg-black border border-white/10 shadow-lg">
+              <div className="relative aspect-video rounded-2xl overflow-hidden bg-black border border-white/20 shadow-2xl">
                 <iframe 
                   src={activeVideo.embedUrl} 
                   title={activeVideo.title}
@@ -299,24 +299,25 @@ export default function App() {
             </div>
             <div className="lg:col-span-5 flex flex-col justify-between">
               <div>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-600 text-white text-xs font-bold mb-4">
-                  <Play className="w-3.5 h-3.5 fill-white" /> Sedang Diputar
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-red-600 text-white text-xs font-bold mb-4">
+                  <Play className="w-3.5 h-3.5 fill-white" /> Sedang Diputar Sekarang
                 </span>
-                <h3 className="text-2xl font-bold text-white mb-3">{activeVideo.title}</h3>
-                <p className="text-slate-300 text-sm mb-6 leading-relaxed">{activeVideo.description}</p>
+                <h3 className="text-2xl sm:text-3xl font-bold text-white mb-3">{activeVideo.title}</h3>
+                <p className="text-slate-300 text-sm sm:text-base mb-6 leading-relaxed">{activeVideo.description}</p>
               </div>
 
-              <div className="flex items-center gap-4">
+              <div className="flex flex-wrap items-center gap-4">
                 <a 
                   href={activeVideo.url}
                   target="_blank"
                   rel="noreferrer"
-                  className="px-5 py-3 rounded-xl bg-red-600 hover:bg-red-500 text-white font-semibold text-sm transition-all flex items-center gap-2 shadow-lg"
+                  className="px-6 py-3.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-semibold text-sm transition-all flex items-center gap-2 shadow-lg"
                   data-testid="watch-on-youtube-btn"
                 >
                   <ExternalLink className="w-4 h-4" />
-                  <span>Tonton Langsung di YouTube</span>
+                  <span>Buka Video di YouTube</span>
                 </a>
+                <span className="text-xs text-amber-400 font-mono">Durasi: {activeVideo.duration}</span>
               </div>
             </div>
           </div>
@@ -328,28 +329,28 @@ export default function App() {
             <div 
               key={vid.id}
               onClick={() => setActiveVideo(vid)}
-              className={`cursor-pointer p-6 rounded-2xl border transition-all duration-300 flex flex-col justify-between ${activeVideo.id === vid.id ? 'bg-amber-50 border-amber-500 shadow-md ring-2 ring-amber-500/20' : 'bg-white border-slate-200 hover:border-amber-400 hover:shadow-lg'}`}
+              className={`cursor-pointer p-6 rounded-2xl border-2 transition-all duration-300 flex flex-col justify-between ${activeVideo.id === vid.id ? 'bg-amber-50 border-amber-500 shadow-xl ring-4 ring-amber-500/20 scale-[1.02]' : 'bg-white border-slate-200 hover:border-amber-400 hover:shadow-lg'}`}
               data-testid={`video-card-${vid.id}`}
             >
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <span className="w-8 h-8 rounded-full bg-red-100 text-red-600 font-bold flex items-center justify-center text-xs">
+                  <span className="w-9 h-9 rounded-xl bg-red-100 text-red-600 font-black flex items-center justify-center text-sm">
                     0{idx + 1}
                   </span>
-                  <span className="text-xs font-mono text-slate-500 bg-slate-100 px-2 py-1 rounded">
+                  <span className="text-xs font-mono font-bold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg">
                     {vid.duration}
                   </span>
                 </div>
-                <h4 className="font-bold text-slate-900 text-base mb-2">{vid.title}</h4>
-                <p className="text-xs text-slate-600 mb-4 line-clamp-2">{vid.description}</p>
+                <h4 className="font-bold text-slate-900 text-lg mb-2">{vid.title}</h4>
+                <p className="text-xs text-slate-600 mb-4 line-clamp-2 leading-relaxed">{vid.description}</p>
               </div>
 
-              <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-amber-700">
+              <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-amber-700">
                 <span className="flex items-center gap-1.5">
                   <Play className="w-4 h-4 text-red-600 fill-red-600" />
-                  {activeVideo.id === vid.id ? 'Sedang Diputar' : 'Putar Video'}
+                  {activeVideo.id === vid.id ? 'Sedang Diputar' : 'Klik untuk Putar'}
                 </span>
-                <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
+                <ExternalLink className="w-4 h-4 text-slate-400" />
               </div>
             </div>
           ))}
