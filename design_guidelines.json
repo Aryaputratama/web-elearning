@@ -1,0 +1,40 @@
+{
+  "project_name": "Career Kickstart & Template Hub",
+  "app_type": "career_kickstart_platform",
+  "archetype": "Swiss & High-Contrast / Old Money Tech",
+  "typography": {
+    "headings": "Cabinet Grotesk, Outfit, or Inter (bold weights with tracking-tight)",
+    "body": "Inter, system-ui, sans-serif"
+  },
+  "colors": {
+    "primary": "#0F172A",
+    "secondary": "#2563EB",
+    "accent": "#F59E0B",
+    "background": "#F8FAFC",
+    "surface": "#FFFFFF"
+  },
+  "image_urls": [
+    {
+      "category": "templates_hero",
+      "url": "https://images.unsplash.com/photo-1693045181178-d5d83fb070c8?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA3MDR8MHwxfHNlYXJjaHwxfHxjYXJlZXIlMjBwcm9mZXNzaW9uYWwlMjByZXN1bWUlMjB0ZW1wbGF0ZSUyMG1vZGVybiUyMG1pbmltYWxpc3R8ZW58MHx8fHwxNzg1OTA3OTAzfDA&ixlib=rb-4.1.0&q=85",
+      "description": "Clean professional resume template layout"
+    },
+    {
+      "category": "document_preview",
+      "url": "https://images.unsplash.com/photo-1635253548172-d82ffe76449d?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA3MDR8MHwxfHNlYXJjaHwyfHxjYXJlZXIlMjBwcm9mZXNzaW9uYWwlMjByZXN1bWUlMjB0ZW1wbGF0ZSUyMG1vZGVybiUyMG1pbmltYWxpc3R8ZW58MHx8fHwxNzg1OTA3OTAzfDA&ixlib=rb-4.1.0&q=85",
+      "description": "Professional document paper and stationary preview"
+    }
+  ],
+  "key_functionalities": [
+    "CV template download (.rar)",
+    "Cover letter template download (.rar)",
+    "Templates Hub & Episode integration",
+    "Interactive career kickoff toolset and resource library"
+  ],
+  "universal_guidelines": {
+    "no_universal_transition": true,
+    "no_center_align_app": true,
+    "interactive_elements_test_ids": true,
+    "no_fully_transparent_header": true
+  }
+}
