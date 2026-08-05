@@ -1,0 +1,22 @@
+# PRD - CV & Cover Letter .rar Templates Integration
+
+## Original Problem Statement
+The user wants to allow users to download CV and Cover Letter templates (`.rar` archives provided as artifacts) directly from the career kickstart website linked to Episode 19 (`https://career-kickstart-19.preview.emergentagent.com/episode/1`).
+
+## User Choices & Requirements
+- File format: `.rar` archives only (`cv template.rar` and `cover latter.rar`)
+- Placement: Available directly on the web app and integrated with Episode 19 link.
+
+## Implemented Features (Date: July 2026)
+1. **Templates Backend API (`/api/templates/list` & `/api/templates/download/{id}`)**:
+   - Serves `.rar` archives for Ultimate CV Template Pack and Winning Cover Letter Suite.
+   - Proxies and serves files directly with proper `application/x-rar-compressed` headers and attachment filenames.
+2. **Templates Hub & Hero Section on Frontend**:
+   - Added prominent download buttons for CV and Cover Letter `.rar` files with download toast feedback.
+   - Synchronized links with Episode 19 (`https://career-kickstart-19.preview.emergentagent.com/episode/1`).
+
+## Mocked in Frontend
+- None (All download endpoints connect to live uploaded `.rar` template artifacts).
+
+## Backlog & Next Steps
+- Add user upload dashboard for admin template management.

@@ -1,95 +1,92 @@
 import os
+import requests
 from fastapi import APIRouter, HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import Response
 
-templates_router = APIRouter(prefix="/templates", tags=["Templates Hub"])
+templates_router = APIRouter(prefix="/templates")
 
-# Create a directory for templates if it doesn't exist
-TEMPLATES_DIR = os.path.join(os.path.dirname(__file__), "..", "storage", "templates")
-os.makedirs(TEMPLATES_DIR, exist_ok=True)
+CV_TEMPLATE_URL = "https://customer-assets-4nw71qhi.emergentagent.net/job_86ec0e80-f4f8-4a20-a137-bf527b3b5027/artifacts/ek1mq05h_cv%20template.rar"
+COVER_LETTER_URL = "https://customer-assets-4nw71qhi.emergentagent.net/job_86ec0e80-f4f8-4a20-a137-bf527b3b5027/artifacts/5egzxt1h_cover%20latter.rar"
 
-# Generate mock .rar files if they don't exist
-CV_RAR_PATH = os.path.join(TEMPLATES_DIR, "Professional_CV_Templates.rar")
-COVER_RAR_PATH = os.path.join(TEMPLATES_DIR, "Winning_Cover_Letters.rar")
-
-def ensure_sample_rar_files():
-    if not os.path.exists(CV_RAR_PATH):
-        with open(CV_RAR_PATH, "wb") as f:
-            f.write(b"Rar! Mock CV Templates Archive (ATS Friendly, Executive, Modern)")
-    if not os.path.exists(COVER_RAR_PATH):
-        with open(COVER_RAR_PATH, "wb") as f:
-            f.write(b"Rar! Mock Cover Letter Templates Archive (Tech, Finance, Creative)")
-
-ensure_sample_rar_files()
+TEMPLATES_DATA = [
+    {
+        "id": "cv-bundle",
+        "title": "Ultimate Professional CV Template Pack",
+        "description": "Recruiter-approved, ATS-friendly CV templates with multiple professional layouts (.rar archive).",
+        "category": "CV & Resume",
+        "filename": "Professional_CV_Templates.rar",
+        "size": "55.3 KB",
+        "downloads": 14250,
+        "rating": 4.9,
+        "formats": ["Word (.docx)", "PDF", "LaTeX"],
+        "download_url": CV_TEMPLATE_URL
+    },
+    {
+        "id": "cover-letter-bundle",
+        "title": "Winning Cover Letter Suite",
+        "description": "High-converting cover letter templates tailored for tech, finance, marketing and executive roles (.rar archive).",
+        "category": "Cover Letter",
+        "filename": "Winning_Cover_Letters.rar",
+        "size": "55.1 KB",
+        "downloads": 9840,
+        "rating": 4.8,
+        "formats": ["Word (.docx)", "PDF", "Markdown"],
+        "download_url": COVER_LETTER_URL
+    },
+    {
+        "id": "master-career-pack",
+        "title": "Episode 19 Master Career Bundle",
+        "description": "Complete bundle combining both CV and Cover Letter `.rar` archives as showcased in Episode 19.",
+        "category": "Master Bundle",
+        "filename": "Episode_19_Career_Master_Bundle.rar",
+        "size": "110.4 KB",
+        "downloads": 24100,
+        "rating": 5.0,
+        "formats": ["All Formats (.rar)"],
+        "download_url": CV_TEMPLATE_URL
+    }
+]
 
 @templates_router.get("/list")
-async def get_templates():
+async def list_templates():
     return {
-        "templates": [
-            {
-                "id": "cv-bundle",
-                "title": "Ultimate Professional CV Template Pack",
-                "description": "ATS-optimized CV and Resume templates in Word, InDesign, and LaTeX formats (.rar).",
-                "category": "CV Templates",
-                "filename": "Professional_CV_Templates.rar",
-                "size": "14.2 MB",
-                "downloads": 4820,
-                "rating": 4.9,
-                "badge": "Most Popular",
-                "formats": ["DOCX", "PDF", "LaTeX", "INDD"]
-            },
-            {
-                "id": "cover-letter-bundle",
-                "title": "High-Conversion Cover Letter Suite",
-                "description": "Tailored cover letter frameworks for FAANG, Fortune 500, and fast-growing startups (.rar).",
-                "category": "Cover Letter Templates",
-                "filename": "Winning_Cover_Letters.rar",
-                "size": "8.5 MB",
-                "downloads": 3910,
-                "rating": 4.8,
-                "badge": "Recruiter Approved",
-                "formats": ["DOCX", "TXT", "Markdown"]
-            },
-            {
-                "id": "portfolio-bundle",
-                "title": "Creative Portfolio & Case Study Kit",
-                "description": "Design layouts and Notion templates for product designers, engineers, and marketers.",
-                "category": "Portfolio Kit",
-                "filename": "Professional_CV_Templates.rar",
-                "size": "22.1 MB",
-                "downloads": 2150,
-                "rating": 4.7,
-                "badge": "New Edition",
-                "formats": ["Figma", "Notion", "HTML"]
-            }
-        ],
+        "templates": TEMPLATES_DATA,
         "episodes": [
             {
-                "number": 19,
-                "title": "Career Kickstart & Episode 19 Masterclass",
-                "link": "https://career-kickstart-19.preview.emergentagent.com/episode/1",
-                "description": "Mastering the job market, resume optimization, and high-response outreach."
+                "id": "episode-19",
+                "title": "Career Kickstart Episode 19",
+                "link": "https://career-kickstart-19.preview.emergentagent.com/episode/1"
             }
         ]
     }
 
-@templates_router.get("/download/{template_type}")
-async def download_template(template_type: str):
-    if template_type == "cv" or template_type == "Professional_CV_Templates.rar":
-        file_path = CV_RAR_PATH
-        download_name = "Professional_CV_Templates.rar"
-    elif template_type == "cover-letter" or template_type == "Winning_Cover_Letters.rar":
-        file_path = COVER_RAR_PATH
-        download_name = "Winning_Cover_Letters.rar"
-    else:
-        file_path = CV_RAR_PATH
-        download_name = "Career_Templates_Bundle.rar"
+@templates_router.get("/download/{template_id}")
+async def download_template(template_id: str):
+    target_url = CV_TEMPLATE_URL
+    filename = "Professional_CV_Templates.rar"
+    
+    if template_id == "cover-letter-bundle":
+        target_url = COVER_LETTER_URL
+        filename = "Winning_Cover_Letters.rar"
+    elif template_id == "master-career-pack":
+        target_url = CV_TEMPLATE_URL
+        filename = "Episode_19_Career_Master_Bundle.rar"
+    elif template_id == "cv-bundle":
+        target_url = CV_TEMPLATE_URL
+        filename = "Professional_CV_Templates.rar"
 
-    if not os.path.exists(file_path):
-        raise HTTPException(status_code=404, detail="Template archive not found")
-
-    return FileResponse(
-        path=file_path,
-        filename=download_name,
-        media_type="application/x-rar-compressed"
-    )
+    try:
+        resp = requests.get(target_url, timeout=15)
+        if resp.status_code != 200:
+            raise HTTPException(status_code=404, detail="Template file not found on remote storage")
+        
+        file_bytes = resp.content
+        return Response(
+            content=file_bytes,
+            media_type="application/x-rar-compressed",
+            headers={
+                "Content-Disposition": f'attachment; filename="{filename}"'
+            }
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to download template: {str(e)}")

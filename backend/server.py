@@ -66,8 +66,9 @@ async def get_status_checks():
     
     return status_checks
 
-# Include the router in the main app
-app.include_router(api_router)
+# Include templates router
+from templates_api import templates_router
+app.include_router(templates_router, prefix="/api")
 
 # Include templates router
 from templates_api import templates_router
