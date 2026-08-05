@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Toaster, toast } from "sonner";
 import { 
   FileText, Download, Sparkles, CheckCircle2, ArrowRight, 
-  BookOpen, Star, ShieldCheck, Zap, ExternalLink, Menu, X, Award, PlayCircle, Youtube, MessageCircle, Send, HelpCircle 
+  BookOpen, Star, ShieldCheck, Zap, ExternalLink, Menu, X, Award, PlayCircle, MessageCircle, Send, HelpCircle, Video, Play
 } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -55,7 +55,6 @@ export default function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeVideo, setActiveVideo] = useState(YOUTUBE_VIDEOS[0]);
   const [question, setQuestion] = useState("");
-  const [chatSubmitted, setChatSubmitted] = useState(false);
 
   const handleDownload = (templateId, filename, title) => {
     const downloadUrl = `${API}/templates/download/${templateId}`;
@@ -74,11 +73,9 @@ export default function App() {
   const handleQuestionSubmit = (e) => {
     e.preventDefault();
     if (!question.trim()) return;
-    setChatSubmitted(true);
     toast.success("Pertanyaan berhasil dikirim ke Kak Arya!", {
       description: "Anda akan dihubungkan melalui WhatsApp ke nomor 08111188644."
     });
-    // Open WhatsApp with prefilled question to Arya
     const waUrl = `https://wa.me/628111188644?text=${encodeURIComponent(`Halo Kak Arya, saya ingin bertanya seputar CV & Cover Letter: ${question}`)}`;
     setTimeout(() => {
       window.open(waUrl, "_blank");
@@ -275,7 +272,7 @@ export default function App() {
       <section id="tutorial-video" className="py-24 max-w-7xl mx-auto px-6">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-600 text-xs font-bold mb-4">
-            <Youtube className="w-4 h-4" />
+            <Video className="w-4 h-4" />
             <span>5 VIDEO TUTORIAL YOUTUBE RESMI</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight mb-4">
@@ -303,7 +300,7 @@ export default function App() {
             <div className="lg:col-span-5 flex flex-col justify-between">
               <div>
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-600 text-white text-xs font-bold mb-4">
-                  <PlayCircle className="w-3.5 h-3.5" /> Sedang Diputar
+                  <Play className="w-3.5 h-3.5 fill-white" /> Sedang Diputar
                 </span>
                 <h3 className="text-2xl font-bold text-white mb-3">{activeVideo.title}</h3>
                 <p className="text-slate-300 text-sm mb-6 leading-relaxed">{activeVideo.description}</p>
@@ -317,7 +314,7 @@ export default function App() {
                   className="px-5 py-3 rounded-xl bg-red-600 hover:bg-red-500 text-white font-semibold text-sm transition-all flex items-center gap-2 shadow-lg"
                   data-testid="watch-on-youtube-btn"
                 >
-                  <Youtube className="w-4 h-4" />
+                  <ExternalLink className="w-4 h-4" />
                   <span>Tonton Langsung di YouTube</span>
                 </a>
               </div>
@@ -349,7 +346,7 @@ export default function App() {
 
               <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-amber-700">
                 <span className="flex items-center gap-1.5">
-                  <PlayCircle className="w-4 h-4 text-red-600" />
+                  <Play className="w-4 h-4 text-red-600 fill-red-600" />
                   {activeVideo.id === vid.id ? 'Sedang Diputar' : 'Putar Video'}
                 </span>
                 <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
@@ -378,7 +375,7 @@ export default function App() {
 
                 <div className="flex items-center gap-4">
                   <a 
-                    href="https://wa.me/628111188644?text=Halo%20Kak%20Arya,%20saya%20ingin%20bertanya%20mengenai%20pembuatan%20CV."
+                    href="https://wa.me/628111188644?text=Halo%20Kak%20Arya,%20saya%20ingin%20berkonsultasi%20karir."
                     target="_blank"
                     rel="noreferrer"
                     className="px-6 py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm transition-all shadow-lg flex items-center gap-2"
