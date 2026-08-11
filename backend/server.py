@@ -65,14 +65,13 @@ api_router.include_router(admin_router)
 
 app.include_router(api_router)
 
-# CORS: must allow credentials + explicit origin patterns. We use "*" but that
-# doesn't work with allow_credentials=True. Read a comma list, fall back to reflect.
+# CORS: allow same-origin preview host + emergentagent subdomains + localhost.
+# Never reflect arbitrary origins when allow_credentials=True (security).
 cors_origins = os.environ.get('CORS_ORIGINS', '*')
 if cors_origins == '*':
-    # Reflect any origin (needed for preview URLs) - use regex
     app.add_middleware(
         CORSMiddleware,
-        allow_origin_regex=".*",
+        allow_origin_regex=r"^(https://[a-z0-9-]+\.(preview\.)?emergentagent\.com|http://localhost:\d+|http://127\.0\.0\.1:\d+)$",
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],

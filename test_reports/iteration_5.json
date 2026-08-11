@@ -1,0 +1,40 @@
+{
+  "summary": "Second regression pass after SEC-001 (CORS regex + SameSite=Lax cookies) and SEC-002 (HTML escape in email templates). All 25 backend pytest tests pass, full frontend E2E (register→mark v1+v2→28% progress→logout→admin login→admin dashboard shows new user) verified on preview URL. Both security fixes confirmed working via direct-backend CORS probes and unit tests of email builder functions.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "sec_verification": {
+    "SEC-001_CORS_regex": {
+      "verified_on_direct_backend": true,
+      "evil_origin_response": "no ACAO header (rejected)",
+      "valid_emergent_origin_response": "ACAO=https://career-boost-410.preview.emergentagent.com, ACAC=true",
+      "localhost_response": "ACAO=http://localhost:3000",
+      "public_url_note": "Public preview URL preflight is intercepted by Cloudflare/ingress which returns ACAO:* WITHOUT Access-Control-Allow-Credentials. Browsers reject ACAO:* + credentials, so this is safe. Since frontend is same-origin with API via k8s ingress, no preflight is triggered in practice."
+    },
+    "SEC-001_SameSite_Lax": {
+      "verified": true,
+      "note": "Auth cookies set with samesite=lax, secure=true. Full UI flow (login→me→mark→logout) works end-to-end because frontend and /api are same-origin from browser POV."
+    },
+    "SEC-002_HTML_escape": {
+      "verified": true,
+      "build_login_email_html": "user_name and user_email are html.escape()'d — <img>, <b>, <script> tags become &lt;img&gt; etc.",
+      "build_progress_email_html": "user_name, user_email, video_title all escaped.",
+      "e2e_test": "Registered user with name='<img src=x onerror=alert(1)>Attacker' — stored raw in DB, rendered as text by React in admin dashboard, and escaped in email HTML output."
+    }
+  },
+  "test_report_links": ["/app/backend/tests/test_regression.py", "/app/test_reports/pytest/pytest_results.xml"],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "server.py still uses deprecated @app.on_event('startup'/'shutdown') — migrate to FastAPI lifespan context manager.",
+    "auth_utils.get_current_user mutates raw MongoDB doc (assigns user['_id']=str(user['_id'])) — consider returning a Pydantic model.",
+    "email_service.send_admin_notification's Resend failures (testing-mode 403) fire on every /tracking/mark; consider throttling or one-time warning to reduce log noise.",
+    "CORS_ORIGINS env var fallback to '*' triggers the regex-mode branch — this is fine but the semantic (env='*' means 'use regex') is a footgun; document or rename the env sentinel.",
+    "auth_utils.set_auth_cookies still has a stale comment: '# samesite=none + secure=True is required for cross-origin cookies with credentials' — the code now uses samesite='lax', update the comment."
+  ],
+  "updated_files": ["/app/backend/tests/test_regression.py (added TestCORS with 4 cases + TestHtmlEscape with 3 cases)"],
+  "success_rate": {"backend": "100% (25/25)", "frontend": "100% (register, mark v1+v2 → 28%, logout, admin login, admin dashboard row visible)"},
+  "test_credentials": "Admin: aryaputratama68@gmail.com / Quincy2108. Test users auto-created with timestamped emails.",
+  "seed_data_creation": "testuser_<ts>@example.com auto-cleaned by fixture. uitest_<ts>@example.com left in DB (harmless test artifact). xsstest_<ts>@example.com created & cleaned by SEC-002 e2e test.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "SEC-001 CORS tests MUST hit http://localhost:8001/api (DIRECT_API constant) — the public preview URL is fronted by Cloudflare which overrides OPTIONS with ACAO:* (safe because no ACAC:true accompanies it). SEC-002 tests directly invoke build_login_email_html / build_progress_email_html and assert &lt; escape. Frontend uses same-origin API through k8s ingress so SameSite=Lax cookies attach — do NOT change to samesite=none unless splitting frontend to a different origin."
+}

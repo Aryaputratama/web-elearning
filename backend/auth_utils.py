@@ -89,13 +89,14 @@ async def require_admin(request: Request):
 
 
 def set_auth_cookies(response, access_token: str, refresh_token: str):
-    # samesite=none + secure=True is required for cross-origin cookies with credentials
+    # samesite=lax: cookies attach on same-origin requests (frontend and /api share
+    # the ingress host via k8s), and are NOT sent on cross-site requests → CSRF-safe.
     response.set_cookie(
         key="access_token",
         value=access_token,
         httponly=True,
         secure=True,
-        samesite="none",
+        samesite="lax",
         max_age=ACCESS_TOKEN_MINUTES * 60,
         path="/",
     )
@@ -104,12 +105,12 @@ def set_auth_cookies(response, access_token: str, refresh_token: str):
         value=refresh_token,
         httponly=True,
         secure=True,
-        samesite="none",
+        samesite="lax",
         max_age=REFRESH_TOKEN_DAYS * 24 * 3600,
         path="/",
     )
 
 
 def clear_auth_cookies(response):
-    response.delete_cookie("access_token", path="/", samesite="none", secure=True)
-    response.delete_cookie("refresh_token", path="/", samesite="none", secure=True)
+    response.delete_cookie("access_token", path="/", samesite="lax", secure=True)
+    response.delete_cookie("refresh_token", path="/", samesite="lax", secure=True)
