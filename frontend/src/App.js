@@ -139,10 +139,10 @@ export default function App() {
   const handleQuestionSubmit = (e) => {
     e.preventDefault();
     if (!question.trim()) return;
-    toast.success("Pertanyaan berhasil dikirim ke Kak Arya!", {
+    toast.success("Pertanyaan berhasil dikirim ke HCG Teams!", {
       description: "Anda akan dihubungkan melalui WhatsApp ke nomor 08111188644."
     });
-    const waUrl = `https://wa.me/628111188644?text=${encodeURIComponent(`Halo Kak Arya, saya ingin bertanya seputar CV & Cover Letter: ${question}`)}`;
+    const waUrl = `https://wa.me/628111188644?text=${encodeURIComponent(`Halo HCG Teams, saya ingin bertanya seputar CV & Cover Letter: ${question}`)}`;
     setTimeout(() => {
       window.open(waUrl, "_blank");
     }, 1000);
@@ -181,21 +181,21 @@ export default function App() {
             <a href="#download-section" className="text-sm font-medium text-slate-900 font-semibold bg-amber-500/10 px-4 py-2 rounded-xl text-amber-800 border border-amber-500/30" data-testid="nav-sumber-daya">
               📥 Unduh Template (.rar)
             </a>
-            <a href="#kontak-arya" className="text-sm font-medium text-slate-700 hover:text-amber-600 transition-colors" data-testid="nav-kontak">
-              💬 Tanya Kak Arya (08111188644)
+            <a href="#kontak-hcg" className="text-sm font-medium text-slate-700 hover:text-amber-600 transition-colors" data-testid="nav-kontak">
+              💬 Tanya HCG Teams (08111188644)
             </a>
           </nav>
 
           <div className="hidden md:flex items-center gap-4">
             <a 
-              href="https://wa.me/628111188644?text=Halo%20Kak%20Arya,%20saya%20ingin%20berkonsultasi%20karir."
+              href="https://wa.me/628111188644?text=Halo%20HCG%20Teams,%20saya%20ingin%20berkonsultasi%20karir."
               target="_blank"
               rel="noreferrer"
               className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-sm transition-all shadow-md flex items-center gap-2"
               data-testid="header-wa-cta"
             >
               <MessageCircle className="w-4 h-4" />
-              <span>Chat WhatsApp Arya</span>
+              <span>Chat WhatsApp HCG Teams</span>
             </a>
           </div>
 
@@ -216,7 +216,7 @@ export default function App() {
             <a href="#tips-wawancara" onClick={() => setMobileMenuOpen(false)} className="text-base font-medium text-slate-800">🎤 Tips Wawancara Kerja</a>
             <a href="#progres-belajar" onClick={() => setMobileMenuOpen(false)} className="text-base font-semibold text-emerald-700">🏆 Progres Belajar ({progressPercent}%)</a>
             <a href="#download-section" onClick={() => setMobileMenuOpen(false)} className="text-base font-semibold text-amber-700">📥 Unduh Template .rar</a>
-            <a href="#kontak-arya" onClick={() => setMobileMenuOpen(false)} className="text-base font-medium text-slate-800">💬 Tanya Kak Arya</a>
+            <a href="#kontak-hcg" onClick={() => setMobileMenuOpen(false)} className="text-base font-medium text-slate-800">💬 Tanya HCG Teams</a>
             <a 
               href="https://wa.me/628111188644"
               target="_blank"
@@ -224,7 +224,7 @@ export default function App() {
               className="w-full py-3 rounded-xl bg-emerald-600 text-white text-center font-medium flex items-center justify-center gap-2"
             >
               <MessageCircle className="w-4 h-4" />
-              <span>WhatsApp Kak Arya (08111188644)</span>
+              <span>WhatsApp HCG Teams (08111188644)</span>
             </a>
           </div>
         )}
@@ -569,7 +569,7 @@ export default function App() {
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
-              <h4 className="font-bold text-slate-900 mb-1">Tips dari Kak Arya</h4>
+              <h4 className="font-bold text-slate-900 mb-1">Tips dari HCG Teams</h4>
               <p className="text-sm text-slate-700 leading-relaxed">
                 Latih dulu di depan cermin atau bareng teman panti. Ucapkan salam, sebutkan nama, umur, dan hobi dengan senyum. Ingat: <strong>HRD suka orang yang jujur dan bersemangat</strong>, bukan yang paling pintar bicara.
               </p>
@@ -578,30 +578,30 @@ export default function App() {
         </div>
       </section>
 
-      {/* Bagian Kontak Tanya Kak Arya (08111188644) */}
-      <section id="kontak-arya" className="py-20 bg-gradient-to-r from-amber-900 via-amber-950 to-slate-950 text-white">
+      {/* Bagian Kontak Tanya HCG Teams (08111188644) */}
+      <section id="kontak-hcg" className="py-20 bg-gradient-to-r from-amber-900 via-amber-950 to-slate-950 text-white">
         <div className="max-w-5xl mx-auto px-6">
           <div className="p-8 sm:p-12 rounded-3xl bg-black/40 border border-amber-500/30 backdrop-blur-xl shadow-2xl">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
               
               <div className="lg:col-span-6">
                 <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-bold mb-4">
-                  <MessageCircle className="w-4 h-4" /> KONSULTASI GRATIS DENGAN KAK ARYA
+                  <MessageCircle className="w-4 h-4" /> KONSULTASI GRATIS DENGAN HCG TEAMS
                 </span>
                 <h3 className="text-3xl font-bold text-white mb-4">
                   Punya Pertanyaan Seputar CV atau Cara Melamar Kerja?
                 </h3>
                 <p className="text-slate-300 text-sm leading-relaxed mb-6">
-                  Jangan ragu! Kirimkan pertanyaan atau kendala Anda langsung kepada Kak Arya melalui WhatsApp di nomor <strong className="text-amber-400 font-mono">08111188644</strong>. Kami siap membantu anak-anak panti meraih impian karir!
+                  Jangan ragu! Kirimkan pertanyaan atau kendala Anda langsung kepada HCG Teams melalui WhatsApp di nomor <strong className="text-amber-400 font-mono">08111188644</strong>. Kami siap membantu anak-anak panti meraih impian karir!
                 </p>
 
                 <div className="flex items-center gap-4">
                   <a 
-                    href="https://wa.me/628111188644?text=Halo%20Kak%20Arya,%20saya%20ingin%20berkonsultasi%20karir."
+                    href="https://wa.me/628111188644?text=Halo%20HCG%20Teams,%20saya%20ingin%20berkonsultasi%20karir."
                     target="_blank"
                     rel="noreferrer"
                     className="px-6 py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm transition-all shadow-lg flex items-center gap-2"
-                    data-testid="whatsapp-arya-btn"
+                    data-testid="whatsapp-hcg-btn"
                   >
                     <MessageCircle className="w-5 h-5" />
                     <span>Chat WhatsApp (08111188644)</span>
@@ -613,17 +613,17 @@ export default function App() {
                 <form onSubmit={handleQuestionSubmit} className="p-6 rounded-2xl bg-white/10 border border-white/20 backdrop-blur-md">
                   <h4 className="font-bold text-lg text-white mb-3 flex items-center gap-2">
                     <HelpCircle className="w-5 h-5 text-amber-400" />
-                    Tulis Pertanyaan Anda ke Kak Arya
+                    Tulis Pertanyaan Anda ke HCG Teams
                   </h4>
                   <p className="text-xs text-slate-300 mb-4">
-                    Ketik pertanyaan Anda di bawah ini. Tombol kirim akan langsung menghubungkan Anda ke WhatsApp Kak Arya (08111188644).
+                    Ketik pertanyaan Anda di bawah ini. Tombol kirim akan langsung menghubungkan Anda ke WhatsApp HCG Teams (08111188644).
                   </p>
 
                   <textarea 
                     rows={4}
                     value={question}
                     onChange={(e) => setQuestion(e.target.value)}
-                    placeholder="Contoh: Kak Arya, bagaimana cara membuat pengalaman kerja di CV jika saya belum pernah bekerja formal?"
+                    placeholder="Contoh: HCG Teams, bagaimana cara membuat pengalaman kerja di CV jika saya belum pernah bekerja formal?"
                     className="w-full p-3.5 rounded-xl bg-black/40 border border-white/20 text-white placeholder-slate-400 text-sm focus:outline-none focus:border-amber-400 mb-4 resize-none"
                     data-testid="question-textarea"
                   ></textarea>
@@ -655,14 +655,14 @@ export default function App() {
           </div>
 
           <p className="text-xs text-center md:text-left">
-            Didukung oleh Kak Arya (08111188644). Unduh template `.rar` dan tonton 5 video tutorial YouTube gratis.
+            Didukung oleh HCG Teams (08111188644). Unduh template `.rar` dan tonton 5 video tutorial YouTube gratis.
           </p>
 
           <div className="flex items-center gap-6">
             <a href="#tutorial-video" className="hover:text-amber-600 transition-colors">Video Tutorial</a>
             <a href="#tips-wawancara" className="hover:text-amber-600 transition-colors">Tips Wawancara</a>
             <a href="#download-section" className="hover:text-amber-600 transition-colors">Unduh Template</a>
-            <a href="#kontak-arya" className="hover:text-amber-600 transition-colors">Kontak Kak Arya</a>
+            <a href="#kontak-hcg" className="hover:text-amber-600 transition-colors">Kontak HCG Teams</a>
           </div>
         </div>
       </footer>
