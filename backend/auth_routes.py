@@ -58,7 +58,7 @@ async def _notify_login(user: dict):
 
 @auth_router.post("/register")
 async def register(payload: RegisterInput, response: Response):
-    from server import db
+    from database import db
     email = payload.email.lower().strip()
     existing = await db.users.find_one({"email": email})
     if existing:
@@ -84,7 +84,7 @@ async def register(payload: RegisterInput, response: Response):
 
 @auth_router.post("/login")
 async def login(payload: LoginInput, response: Response):
-    from server import db
+    from database import db
     email = payload.email.lower().strip()
     user = await db.users.find_one({"email": email})
     if not user or not verify_password(payload.password, user.get("password_hash", "")):

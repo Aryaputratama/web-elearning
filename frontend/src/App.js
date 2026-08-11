@@ -87,7 +87,8 @@ export default function App() {
     try {
       const stored = localStorage.getItem("watchedVideos");
       return stored ? new Set(JSON.parse(stored)) : new Set();
-    } catch {
+    } catch (err) {
+      console.warn("localStorage read failed:", err);
       return new Set();
     }
   });
@@ -105,7 +106,9 @@ export default function App() {
     if (user) return;
     try {
       localStorage.setItem("watchedVideos", JSON.stringify(Array.from(guestWatched)));
-    } catch {}
+    } catch (err) {
+      console.warn("localStorage write failed:", err);
+    }
   }, [guestWatched, user]);
 
   const toggleWatched = async (videoId, videoTitle) => {

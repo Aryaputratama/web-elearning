@@ -60,7 +60,7 @@ def _extract_token(request: Request) -> str | None:
 
 
 async def get_current_user(request: Request):
-    from server import db
+    from database import db
     token = _extract_token(request)
     if not token:
         raise HTTPException(status_code=401, detail="Not authenticated")

@@ -9,15 +9,11 @@ import logging
 from datetime import datetime, timezone
 from fastapi import FastAPI, APIRouter
 from starlette.middleware.cors import CORSMiddleware
-from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel, Field, ConfigDict
 from typing import List
 import uuid
 
-# MongoDB connection
-mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+from database import client, db
 
 app = FastAPI()
 api_router = APIRouter(prefix="/api")

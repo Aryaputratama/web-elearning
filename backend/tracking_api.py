@@ -24,7 +24,7 @@ class MarkInput(BaseModel):
 
 @tracking_router.post("/mark")
 async def mark_video(payload: MarkInput, user=Depends(get_current_user)):
-    from server import db
+    from database import db
     uid = ObjectId(user["id"])
     if payload.watched:
         await db.users.update_one(
@@ -77,7 +77,7 @@ async def my_progress(user=Depends(get_current_user)):
 
 @admin_router.get("/users")
 async def list_users(_admin=Depends(require_admin)):
-    from server import db
+    from database import db
     cursor = db.users.find({}, {"password_hash": 0}).sort("last_login", -1)
     users = await cursor.to_list(500)
     result = []

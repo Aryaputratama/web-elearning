@@ -17,7 +17,11 @@ export const AuthProvider = ({ children }) => {
       const { data } = await axios.get(`${API}/auth/me`, { withCredentials: true });
       setUser(data.user);
       return data.user;
-    } catch {
+    } catch (err) {
+      // 401 is expected for guest sessions
+      if (err?.response?.status !== 401) {
+        console.error("auth/me check failed:", err);
+      }
       setUser(null);
       return null;
     }
@@ -53,7 +57,9 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       await axios.post(`${API}/auth/logout`, {}, { withCredentials: true });
-    } catch {}
+    } catch (err) {
+      console.error("logout request failed:", err);
+    }
     setUser(null);
   };
 

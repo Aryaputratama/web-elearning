@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { X, Users, Trophy, Mail, Calendar, RefreshCw, Loader2 } from "lucide-react";
 
@@ -9,7 +9,7 @@ export const AdminDashboard = ({ open, onClose }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
@@ -20,11 +20,11 @@ export const AdminDashboard = ({ open, onClose }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     if (open) load();
-  }, [open]);
+  }, [open, load]);
 
   if (!open) return null;
 
