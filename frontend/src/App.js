@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Toaster, toast } from "sonner";
 import { 
   FileText, Download, Sparkles, CheckCircle2, ArrowRight, 
-  BookOpen, Star, ShieldCheck, Zap, ExternalLink, Menu, X, Award, PlayCircle, MessageCircle, Send, HelpCircle, Video, Play, Mic, UserCheck
+  BookOpen, Star, ShieldCheck, Zap, ExternalLink, Menu, X, Award, PlayCircle, MessageCircle, Send, HelpCircle, Video, Play, Mic, UserCheck, Trophy, RotateCcw, Circle
 } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -74,6 +74,53 @@ export default function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeVideo, setActiveVideo] = useState(YOUTUBE_VIDEOS[0]);
   const [question, setQuestion] = useState("");
+  const [watchedVideos, setWatchedVideos] = useState(() => {
+    try {
+      const stored = localStorage.getItem("watchedVideos");
+      return stored ? new Set(JSON.parse(stored)) : new Set();
+    } catch {
+      return new Set();
+    }
+  });
+
+  const ALL_VIDEO_IDS = [...YOUTUBE_VIDEOS.map(v => v.id), ...INTERVIEW_VIDEOS.map(v => v.id)];
+  const totalVideos = ALL_VIDEO_IDS.length;
+  const watchedCount = ALL_VIDEO_IDS.filter(id => watchedVideos.has(id)).length;
+  const progressPercent = Math.round((watchedCount / totalVideos) * 100);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("watchedVideos", JSON.stringify(Array.from(watchedVideos)));
+    } catch {}
+  }, [watchedVideos]);
+
+  const toggleWatched = (videoId, videoTitle) => {
+    setWatchedVideos(prev => {
+      const next = new Set(prev);
+      if (next.has(videoId)) {
+        next.delete(videoId);
+        toast.info(`Ditandai belum ditonton: ${videoTitle}`);
+      } else {
+        next.add(videoId);
+        const newCount = next.size;
+        if (newCount === totalVideos) {
+          toast.success("🏆 Selamat! Semua 7 video sudah kamu tonton!", {
+            description: "Kamu sudah siap kerja. Yuk unduh CV & Cover Letter template!"
+          });
+        } else {
+          toast.success(`✓ Ditandai sudah ditonton: ${videoTitle}`, {
+            description: `Progres kamu sekarang: ${newCount}/${totalVideos} video`
+          });
+        }
+      }
+      return next;
+    });
+  };
+
+  const resetProgress = () => {
+    setWatchedVideos(new Set());
+    toast.info("Progres belajar direset ke 0%");
+  };
 
   const handleDownload = (templateId, filename, title) => {
     const downloadUrl = `${API}/templates/download/${templateId}`;
@@ -128,6 +175,9 @@ export default function App() {
             <a href="#tips-wawancara" className="text-sm font-medium text-slate-700 hover:text-amber-600 transition-colors" data-testid="nav-wawancara">
               🎤 Tips Wawancara
             </a>
+            <a href="#progres-belajar" className="text-sm font-medium text-slate-700 hover:text-amber-600 transition-colors flex items-center gap-1.5" data-testid="nav-progres">
+              🏆 <span>Progres <span className="text-amber-600 font-bold">{progressPercent}%</span></span>
+            </a>
             <a href="#download-section" className="text-sm font-medium text-slate-900 font-semibold bg-amber-500/10 px-4 py-2 rounded-xl text-amber-800 border border-amber-500/30" data-testid="nav-sumber-daya">
               📥 Unduh Template (.rar)
             </a>
@@ -164,6 +214,7 @@ export default function App() {
           <div className="md:hidden bg-[#FDFBF7] border-b border-amber-950/10 px-6 py-6 flex flex-col gap-4">
             <a href="#tutorial-video" onClick={() => setMobileMenuOpen(false)} className="text-base font-medium text-slate-800">🎥 5 Video Tutorial</a>
             <a href="#tips-wawancara" onClick={() => setMobileMenuOpen(false)} className="text-base font-medium text-slate-800">🎤 Tips Wawancara Kerja</a>
+            <a href="#progres-belajar" onClick={() => setMobileMenuOpen(false)} className="text-base font-semibold text-emerald-700">🏆 Progres Belajar ({progressPercent}%)</a>
             <a href="#download-section" onClick={() => setMobileMenuOpen(false)} className="text-base font-semibold text-amber-700">📥 Unduh Template .rar</a>
             <a href="#kontak-arya" onClick={() => setMobileMenuOpen(false)} className="text-base font-medium text-slate-800">💬 Tanya Kak Arya</a>
             <a 
@@ -218,8 +269,8 @@ export default function App() {
 
               <div className="mt-10 grid grid-cols-3 gap-4 p-5 rounded-2xl bg-white border border-amber-950/10 shadow-sm max-w-lg">
                 <div className="text-center border-r border-slate-100 pr-2">
-                  <span className="block font-black text-xl text-slate-900">5 Video</span>
-                  <span className="text-xs text-slate-500">Tutorial YouTube</span>
+                  <span className="block font-black text-xl text-slate-900">7 Video</span>
+                  <span className="text-xs text-slate-500">Tutorial + Wawancara</span>
                 </div>
                 <div className="text-center border-r border-slate-100 pr-2">
                   <span className="block font-black text-xl text-slate-900">2 File .rar</span>
@@ -228,6 +279,49 @@ export default function App() {
                 <div className="text-center">
                   <span className="block font-black text-xl text-amber-600">100%</span>
                   <span className="text-xs text-slate-500">Gratis & Mandiri</span>
+                </div>
+              </div>
+
+              {/* Progres Belajar 0-100% */}
+              <div id="progres-belajar" className="mt-6 p-6 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 text-white shadow-2xl border border-amber-500/30 max-w-lg" data-testid="progress-tracker">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center shadow-md">
+                      <Trophy className="w-5 h-5 text-slate-900" />
+                    </div>
+                    <div>
+                      <span className="block text-xs font-bold text-amber-400 uppercase tracking-wider">Progres Belajarmu</span>
+                      <span className="block text-sm text-slate-300" data-testid="progress-count-text">{watchedCount} dari {totalVideos} video sudah ditonton</span>
+                    </div>
+                  </div>
+                  <span className="text-3xl font-black text-amber-400 font-mono" data-testid="progress-percent">{progressPercent}%</span>
+                </div>
+
+                <div className="relative h-4 rounded-full bg-slate-700/60 overflow-hidden border border-white/10 shadow-inner" data-testid="progress-bar">
+                  <div
+                    className="h-full bg-gradient-to-r from-amber-400 via-amber-500 to-emerald-400 rounded-full transition-all duration-700 ease-out shadow-lg"
+                    style={{ width: `${progressPercent}%` }}
+                    data-testid="progress-bar-fill"
+                  ></div>
+                </div>
+
+                <div className="mt-4 flex items-center justify-between gap-3">
+                  <p className="text-xs text-slate-300 leading-relaxed flex-1">
+                    {progressPercent === 0 && "Yuk mulai tonton video pertamamu di bawah ini!"}
+                    {progressPercent > 0 && progressPercent < 50 && "Bagus! Terus lanjut, kamu sudah mulai jalan."}
+                    {progressPercent >= 50 && progressPercent < 100 && "Keren! Lebih dari setengah jalan. Semangat!"}
+                    {progressPercent === 100 && "🏆 Selamat! Kamu sudah siap kerja."}
+                  </p>
+                  {watchedCount > 0 && (
+                    <button
+                      onClick={resetProgress}
+                      className="text-xs font-semibold text-slate-300 hover:text-white flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 transition-all shrink-0"
+                      data-testid="reset-progress-btn"
+                    >
+                      <RotateCcw className="w-3 h-3" />
+                      Reset
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -348,17 +442,18 @@ export default function App() {
 
         {/* List 5 Video Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {YOUTUBE_VIDEOS.map((vid, idx) => (
+          {YOUTUBE_VIDEOS.map((vid, idx) => {
+            const isWatched = watchedVideos.has(vid.id);
+            return (
             <div 
               key={vid.id}
-              onClick={() => setActiveVideo(vid)}
-              className={`cursor-pointer p-6 rounded-2xl border-2 transition-all duration-300 flex flex-col justify-between ${activeVideo.id === vid.id ? 'bg-amber-50 border-amber-500 shadow-xl ring-4 ring-amber-500/20 scale-[1.02]' : 'bg-white border-slate-200 hover:border-amber-400 hover:shadow-lg'}`}
+              className={`p-6 rounded-2xl border-2 transition-all duration-300 flex flex-col justify-between ${activeVideo.id === vid.id ? 'bg-amber-50 border-amber-500 shadow-xl ring-4 ring-amber-500/20 scale-[1.02]' : isWatched ? 'bg-emerald-50/60 border-emerald-400 hover:shadow-lg' : 'bg-white border-slate-200 hover:border-amber-400 hover:shadow-lg'}`}
               data-testid={`video-card-${vid.id}`}
             >
-              <div>
+              <div onClick={() => setActiveVideo(vid)} className="cursor-pointer">
                 <div className="flex items-center justify-between mb-4">
-                  <span className="w-9 h-9 rounded-xl bg-red-100 text-red-600 font-black flex items-center justify-center text-sm">
-                    0{idx + 1}
+                  <span className={`w-9 h-9 rounded-xl font-black flex items-center justify-center text-sm ${isWatched ? 'bg-emerald-500 text-white' : 'bg-red-100 text-red-600'}`}>
+                    {isWatched ? <CheckCircle2 className="w-5 h-5" /> : `0${idx + 1}`}
                   </span>
                   <span className="text-xs font-mono font-bold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg">
                     {vid.duration}
@@ -368,15 +463,22 @@ export default function App() {
                 <p className="text-xs text-slate-600 mb-4 line-clamp-2 leading-relaxed">{vid.description}</p>
               </div>
 
-              <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-amber-700">
-                <span className="flex items-center gap-1.5">
+              <div className="pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
+                <span className="flex items-center gap-1.5 text-xs font-bold text-amber-700">
                   <Play className="w-4 h-4 text-red-600 fill-red-600" />
                   {activeVideo.id === vid.id ? 'Sedang Diputar' : 'Klik untuk Putar'}
                 </span>
-                <ExternalLink className="w-4 h-4 text-slate-400" />
+                <button
+                  onClick={(e) => { e.stopPropagation(); toggleWatched(vid.id, vid.title); }}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${isWatched ? 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-md' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-300'}`}
+                  data-testid={`mark-watched-${vid.id}`}
+                >
+                  {isWatched ? <><CheckCircle2 className="w-3.5 h-3.5" />Sudah Ditonton</> : <><Circle className="w-3.5 h-3.5" />Tandai Sudah</>}
+                </button>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       </section>
 
@@ -397,10 +499,12 @@ export default function App() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {INTERVIEW_VIDEOS.map((vid, idx) => (
+            {INTERVIEW_VIDEOS.map((vid, idx) => {
+              const isWatched = watchedVideos.has(vid.id);
+              return (
               <div
                 key={vid.id}
-                className="p-6 rounded-3xl bg-white border-2 border-emerald-500/20 shadow-xl hover:shadow-2xl hover:border-emerald-500/50 transition-all duration-300"
+                className={`p-6 rounded-3xl bg-white border-2 shadow-xl hover:shadow-2xl transition-all duration-300 ${isWatched ? 'border-emerald-500 ring-4 ring-emerald-500/15' : 'border-emerald-500/20 hover:border-emerald-500/50'}`}
                 data-testid={`interview-video-card-${vid.id}`}
               >
                 <div className="flex items-center justify-between mb-4">
@@ -408,9 +512,15 @@ export default function App() {
                     {vid.icon === "intro" ? <UserCheck className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5" />}
                     Bagian {idx + 1}
                   </span>
-                  <span className="text-xs font-mono font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100">
-                    Video Wawancara
-                  </span>
+                  {isWatched ? (
+                    <span className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-emerald-700 bg-emerald-100 px-2.5 py-1 rounded-lg border border-emerald-300">
+                      <CheckCircle2 className="w-3.5 h-3.5" /> Sudah Ditonton
+                    </span>
+                  ) : (
+                    <span className="text-xs font-mono font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100">
+                      Video Wawancara
+                    </span>
+                  )}
                 </div>
 
                 <div className="relative aspect-video rounded-2xl overflow-hidden bg-black border border-slate-200 shadow-lg mb-5">
@@ -430,18 +540,28 @@ export default function App() {
                   {vid.description}
                 </p>
 
-                <a
-                  href={vid.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm transition-all shadow-md"
-                  data-testid={`interview-watch-yt-${vid.id}`}
-                >
-                  <ExternalLink className="w-4 h-4 text-emerald-400" />
-                  <span>Buka di YouTube</span>
-                </a>
+                <div className="flex flex-wrap items-center gap-3">
+                  <a
+                    href={vid.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm transition-all shadow-md"
+                    data-testid={`interview-watch-yt-${vid.id}`}
+                  >
+                    <ExternalLink className="w-4 h-4 text-emerald-400" />
+                    <span>Buka di YouTube</span>
+                  </a>
+                  <button
+                    onClick={() => toggleWatched(vid.id, vid.title)}
+                    className={`inline-flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-sm transition-all ${isWatched ? 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-md' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border-2 border-emerald-300'}`}
+                    data-testid={`mark-watched-${vid.id}`}
+                  >
+                    {isWatched ? <><CheckCircle2 className="w-4 h-4" />Sudah Ditonton</> : <><Circle className="w-4 h-4" />Tandai Sudah Ditonton</>}
+                  </button>
+                </div>
               </div>
-            ))}
+              );
+            })}
           </div>
 
           <div className="mt-12 p-6 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex items-start gap-4 max-w-4xl mx-auto">
