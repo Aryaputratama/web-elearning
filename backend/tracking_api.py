@@ -1,108 +1,102 @@
-import os
-import requests
+"""Tracking routes: mark/unmark watched, get my progress, admin dashboard."""
+import asyncio
+import logging
+from bson import ObjectId
 from fastapi import APIRouter, HTTPException, Depends
-from fastapi.responses import Response
-from pydantic import BaseModel, EmailStr
-from typing import List, Optional
-from datetime import datetime, timezone
+from pydantic import BaseModel, Field
 
-auth_router = APIRouter(prefix="/auth")
+from auth_utils import get_current_user, require_admin
+from email_service import send_admin_notification, build_progress_email_html
+
+logger = logging.getLogger(__name__)
+
 tracking_router = APIRouter(prefix="/tracking")
+admin_router = APIRouter(prefix="/admin")
 
-CV_TEMPLATE_URL = "https://customer-assets-4nw71qhi.emergentagent.net/job_86ec0e80-f4f8-4a20-a137-bf527b3b5027/artifacts/ek1mq05h_cv%20template.rar"
-COVER_LETTER_URL = "https://customer-assets-4nw71qhi.emergentagent.net/job_86ec0e80-f4f8-4a20-a137-bf527b3b5027/artifacts/5egzxt1h_cover%20latter.rar"
+TOTAL_VIDEOS = 7
 
-# In-memory session and user tracking store
-USERS_DB = {}
-PROGRESS_DB = {}
 
-class LoginRequest(BaseModel):
-    email: EmailStr
-    name: Optional[str] = "Siswa Panti Mandiri"
+class MarkInput(BaseModel):
+    video_id: str = Field(min_length=1, max_length=40)
+    video_title: str = Field(default="", max_length=200)
+    watched: bool = True
 
-class ProgressUpdateRequest(BaseModel):
-    email: str
-    watched_videos: List[str] # list of video ids
-    progress_percentage: int
 
-class QuestionRequest(BaseModel):
-    email: str
-    question: str
-
-@auth_router.post("/login")
-async def login_user(data: LoginRequest):
-    email = data.email.lower().strip()
-    USERS_DB[email] = {
-        "email": email,
-        "name": data.name,
-        "last_login": datetime.now(timezone.utc).isoformat()
-    }
-    
-    # Notify aryaputratama68@gmail.com about new visitor login
-    print(f"[EMAIL NOTIFICATION] New user login detected: {email} ({data.name}) -> Sent to aryaputratama68@gmail.com")
-    
-    return {
-        "success": True,
-        "message": f"Login berhasil untuk {email}",
-        "email": email,
-        "name": data.name
-    }
-
-@tracking_router.post("/progress")
-async def update_progress(data: ProgressUpdateRequest):
-    email = data.email.lower().strip()
-    PROGRESS_DB[email] = {
-        "email": email,
-        "watched_videos": data.watched_videos,
-        "progress_percentage": data.progress_percentage,
-        "updated_at": datetime.now(timezone.utc).isoformat()
-    }
-    
-    print(f"[EMAIL NOTIFICATION] Progress update for {email}: {data.progress_percentage}% ({len(data.watched_videos)}/7 videos watched) -> Sent to aryaputratama68@gmail.com")
-    
-    return {
-        "success": True,
-        "progress_percentage": data.progress_percentage,
-        "watched_count": len(data.watched_videos)
-    }
-
-@tracking_router.get("/progress/{email}")
-async def get_progress(email: str):
-    email = email.lower().strip()
-    if email in PROGRESS_DB:
-        return PROGRESS_DB[email]
-    return {"email": email, "watched_videos": [], "progress_percentage": 0}
-
-# Templates download router
-templates_router = APIRouter(prefix="/templates")
-
-@templates_router.get("/download/{template_id}")
-async def download_template(template_id: str):
-    target_url = CV_TEMPLATE_URL
-    filename = "Professional_CV_Templates.rar"
-    
-    if template_id == "cover-letter-bundle":
-        target_url = COVER_LETTER_URL
-        filename = "Winning_Cover_Letters.rar"
-    elif template_id == "master-career-pack":
-        target_url = CV_TEMPLATE_URL
-        filename = "Episode_19_Career_Master_Bundle.rar"
-    elif template_id == "cv-bundle":
-        target_url = CV_TEMPLATE_URL
-        filename = "Professional_CV_Templates.rar"
-
-    try:
-        resp = requests.get(target_url, timeout=15)
-        if resp.status_code != 200:
-            raise HTTPException(status_code=404, detail="Template file not found on remote storage")
-        
-        file_bytes = resp.content
-        return Response(
-            content=file_bytes,
-            media_type="application/x-rar-compressed",
-            headers={
-                "Content-Disposition": f'attachment; filename="{filename}"'
-            }
+@tracking_router.post("/mark")
+async def mark_video(payload: MarkInput, user=Depends(get_current_user)):
+    from server import db
+    uid = ObjectId(user["id"])
+    if payload.watched:
+        await db.users.update_one(
+            {"_id": uid},
+            {"$addToSet": {"watched_videos": payload.video_id}},
         )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to download template: {str(e)}")
+    else:
+        await db.users.update_one(
+            {"_id": uid},
+            {"$pull": {"watched_videos": payload.video_id}},
+        )
+
+    updated = await db.users.find_one({"_id": uid})
+    watched = updated.get("watched_videos", []) or []
+
+    if payload.watched:
+        html = build_progress_email_html(
+            user_name=updated.get("name", ""),
+            user_email=updated.get("email", ""),
+            video_title=payload.video_title or payload.video_id,
+            watched_count=len(watched),
+            total=TOTAL_VIDEOS,
+        )
+        asyncio.create_task(
+            send_admin_notification(
+                subject=f"✅ Progres: {updated.get('name','')} nonton video ({len(watched)}/{TOTAL_VIDEOS})",
+                html=html,
+            )
+        )
+
+    return {
+        "success": True,
+        "watched_videos": watched,
+        "watched_count": len(watched),
+        "total": TOTAL_VIDEOS,
+        "progress_percent": int((len(watched) / TOTAL_VIDEOS) * 100),
+    }
+
+
+@tracking_router.get("/me")
+async def my_progress(user=Depends(get_current_user)):
+    watched = user.get("watched_videos", []) or []
+    return {
+        "watched_videos": watched,
+        "watched_count": len(watched),
+        "total": TOTAL_VIDEOS,
+        "progress_percent": int((len(watched) / TOTAL_VIDEOS) * 100),
+    }
+
+
+@admin_router.get("/users")
+async def list_users(_admin=Depends(require_admin)):
+    from server import db
+    cursor = db.users.find({}, {"password_hash": 0}).sort("last_login", -1)
+    users = await cursor.to_list(500)
+    result = []
+    for u in users:
+        watched = u.get("watched_videos", []) or []
+        result.append({
+            "id": str(u["_id"]),
+            "email": u.get("email", ""),
+            "name": u.get("name", ""),
+            "role": u.get("role", "user"),
+            "watched_videos": watched,
+            "watched_count": len(watched),
+            "total": TOTAL_VIDEOS,
+            "progress_percent": int((len(watched) / TOTAL_VIDEOS) * 100),
+            "created_at": u.get("created_at"),
+            "last_login": u.get("last_login"),
+        })
+    return {
+        "total_users": len(result),
+        "total_videos": TOTAL_VIDEOS,
+        "users": result,
+    }

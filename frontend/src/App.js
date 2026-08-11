@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 import { Toaster, toast } from "sonner";
 import { 
   FileText, Download, Sparkles, CheckCircle2, ArrowRight, 
-  BookOpen, Star, ShieldCheck, Zap, ExternalLink, Menu, X, Award, PlayCircle, MessageCircle, Send, HelpCircle, Video, Play, Mic, UserCheck, Trophy, RotateCcw, Circle
+  BookOpen, Star, ShieldCheck, Zap, ExternalLink, Menu, X, Award, PlayCircle, MessageCircle, Send, HelpCircle, Video, Play, Mic, UserCheck, Trophy, RotateCcw, Circle, LogIn, LogOut, User as UserIcon, Users
 } from "lucide-react";
+import { useAuth } from "./context/AuthContext";
+import { AuthModal } from "./components/AuthModal";
+import { AdminDashboard } from "./components/AdminDashboard";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -74,7 +78,12 @@ export default function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeVideo, setActiveVideo] = useState(YOUTUBE_VIDEOS[0]);
   const [question, setQuestion] = useState("");
-  const [watchedVideos, setWatchedVideos] = useState(() => {
+  const { user, logout, loading: authLoading, setUser } = useAuth();
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authModalMode, setAuthModalMode] = useState("login");
+  const [adminOpen, setAdminOpen] = useState(false);
+
+  const [guestWatched, setGuestWatched] = useState(() => {
     try {
       const stored = localStorage.getItem("watchedVideos");
       return stored ? new Set(JSON.parse(stored)) : new Set();
@@ -83,43 +92,97 @@ export default function App() {
     }
   });
 
+  // Effective watched set: server-backed when logged in, localStorage-backed when guest
+  const watchedVideos = user ? new Set(user.watched_videos || []) : guestWatched;
+
   const ALL_VIDEO_IDS = [...YOUTUBE_VIDEOS.map(v => v.id), ...INTERVIEW_VIDEOS.map(v => v.id)];
   const totalVideos = ALL_VIDEO_IDS.length;
   const watchedCount = ALL_VIDEO_IDS.filter(id => watchedVideos.has(id)).length;
   const progressPercent = Math.round((watchedCount / totalVideos) * 100);
 
+  // Persist guest progress to localStorage
   useEffect(() => {
+    if (user) return;
     try {
-      localStorage.setItem("watchedVideos", JSON.stringify(Array.from(watchedVideos)));
+      localStorage.setItem("watchedVideos", JSON.stringify(Array.from(guestWatched)));
     } catch {}
-  }, [watchedVideos]);
+  }, [guestWatched, user]);
 
-  const toggleWatched = (videoId, videoTitle) => {
-    setWatchedVideos(prev => {
-      const next = new Set(prev);
-      if (next.has(videoId)) {
-        next.delete(videoId);
-        toast.info(`Ditandai belum ditonton: ${videoTitle}`);
-      } else {
-        next.add(videoId);
-        const newCount = next.size;
-        if (newCount === totalVideos) {
-          toast.success("🏆 Selamat! Semua 7 video sudah kamu tonton!", {
-            description: "Kamu sudah siap kerja. Yuk unduh CV & Cover Letter template!"
-          });
+  const toggleWatched = async (videoId, videoTitle) => {
+    if (user) {
+      // Server-backed toggle
+      const isCurrentlyWatched = watchedVideos.has(videoId);
+      const nextWatched = !isCurrentlyWatched;
+      try {
+        const { data } = await axios.post(
+          `${API}/tracking/mark`,
+          { video_id: videoId, video_title: videoTitle, watched: nextWatched },
+          { withCredentials: true }
+        );
+        setUser({ ...user, watched_videos: data.watched_videos });
+        if (nextWatched) {
+          if (data.watched_count === data.total) {
+            toast.success("🏆 Selamat! Semua 7 video sudah kamu tonton!", {
+              description: "Notifikasi progres telah dikirim ke HCG Teams."
+            });
+          } else {
+            toast.success(`✓ Ditandai sudah ditonton: ${videoTitle}`, {
+              description: `Progres kamu: ${data.watched_count}/${data.total} video (${data.progress_percent}%)`
+            });
+          }
         } else {
-          toast.success(`✓ Ditandai sudah ditonton: ${videoTitle}`, {
-            description: `Progres kamu sekarang: ${newCount}/${totalVideos} video`
-          });
+          toast.info(`Ditandai belum ditonton: ${videoTitle}`);
         }
+      } catch (e) {
+        toast.error("Gagal menyimpan progres. Coba lagi.");
       }
-      return next;
-    });
+    } else {
+      // Guest / localStorage toggle
+      setGuestWatched(prev => {
+        const next = new Set(prev);
+        if (next.has(videoId)) {
+          next.delete(videoId);
+          toast.info(`Ditandai belum ditonton: ${videoTitle}`);
+        } else {
+          next.add(videoId);
+          const newCount = next.size;
+          if (newCount === totalVideos) {
+            toast.success("🏆 Selamat! Semua 7 video sudah kamu tonton!", {
+              description: "Login dulu supaya progres kamu tercatat di HCG Teams!"
+            });
+          } else {
+            toast.success(`✓ Ditandai sudah ditonton: ${videoTitle}`, {
+              description: `Progres kamu: ${newCount}/${totalVideos}. Login untuk simpan permanen.`
+            });
+          }
+        }
+        return next;
+      });
+    }
   };
 
-  const resetProgress = () => {
-    setWatchedVideos(new Set());
+  const resetProgress = async () => {
+    if (user) {
+      // Unmark all watched videos
+      const current = Array.from(watchedVideos);
+      for (const vid of current) {
+        try {
+          await axios.post(`${API}/tracking/mark`, { video_id: vid, watched: false }, { withCredentials: true });
+        } catch {}
+      }
+      setUser({ ...user, watched_videos: [] });
+    } else {
+      setGuestWatched(new Set());
+    }
     toast.info("Progres belajar direset ke 0%");
+  };
+
+  const openLogin = () => { setAuthModalMode("login"); setAuthModalOpen(true); };
+  const openRegister = () => { setAuthModalMode("register"); setAuthModalOpen(true); };
+
+  const handleLogout = async () => {
+    await logout();
+    toast.info("Kamu berhasil keluar. Sampai jumpa lagi!");
   };
 
   const handleDownload = (templateId, filename, title) => {
@@ -186,16 +249,60 @@ export default function App() {
             </a>
           </nav>
 
-          <div className="hidden md:flex items-center gap-4">
+          <div className="hidden md:flex items-center gap-3">
+            {authLoading ? null : user ? (
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-sm font-semibold" data-testid="header-user-badge">
+                  <UserIcon className="w-4 h-4" />
+                  <span className="max-w-[140px] truncate">{user.name || user.email}</span>
+                </div>
+                {user.role === "admin" && (
+                  <button
+                    onClick={() => setAdminOpen(true)}
+                    className="px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm transition flex items-center gap-1.5 shadow-md"
+                    data-testid="header-admin-btn"
+                  >
+                    <Users className="w-4 h-4" />
+                    <span>Admin</span>
+                  </button>
+                )}
+                <button
+                  onClick={handleLogout}
+                  className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition"
+                  title="Keluar"
+                  data-testid="header-logout-btn"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={openLogin}
+                  className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm transition flex items-center gap-1.5 shadow-md"
+                  data-testid="header-login-btn"
+                >
+                  <LogIn className="w-4 h-4" />
+                  <span>Masuk</span>
+                </button>
+                <button
+                  onClick={openRegister}
+                  className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-sm transition shadow-md"
+                  data-testid="header-register-btn"
+                >
+                  Daftar
+                </button>
+              </div>
+            )}
             <a 
               href="https://wa.me/628111188644?text=Halo%20HCG%20Teams,%20saya%20ingin%20berkonsultasi%20karir."
               target="_blank"
               rel="noreferrer"
-              className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-sm transition-all shadow-md flex items-center gap-2"
+              className="p-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white transition-all shadow-md"
+              title="Chat WhatsApp HCG Teams"
               data-testid="header-wa-cta"
             >
               <MessageCircle className="w-4 h-4" />
-              <span>Chat WhatsApp HCG Teams</span>
             </a>
           </div>
 
@@ -217,6 +324,45 @@ export default function App() {
             <a href="#progres-belajar" onClick={() => setMobileMenuOpen(false)} className="text-base font-semibold text-emerald-700">🏆 Progres Belajar ({progressPercent}%)</a>
             <a href="#download-section" onClick={() => setMobileMenuOpen(false)} className="text-base font-semibold text-amber-700">📥 Unduh Template .rar</a>
             <a href="#kontak-hcg" onClick={() => setMobileMenuOpen(false)} className="text-base font-medium text-slate-800">💬 Tanya HCG Teams</a>
+            <div className="pt-3 border-t border-slate-200 flex flex-col gap-2">
+              {user ? (
+                <>
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-sm font-semibold">
+                    <UserIcon className="w-4 h-4" />
+                    <span className="truncate">{user.name || user.email}</span>
+                  </div>
+                  {user.role === "admin" && (
+                    <button
+                      onClick={() => { setAdminOpen(true); setMobileMenuOpen(false); }}
+                      className="w-full py-2.5 rounded-xl bg-slate-900 text-white text-sm font-semibold flex items-center justify-center gap-2"
+                    >
+                      <Users className="w-4 h-4" /> Dashboard Admin
+                    </button>
+                  )}
+                  <button
+                    onClick={() => { handleLogout(); setMobileMenuOpen(false); }}
+                    className="w-full py-2.5 rounded-xl bg-slate-100 text-slate-800 text-sm font-semibold flex items-center justify-center gap-2"
+                  >
+                    <LogOut className="w-4 h-4" /> Keluar
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={() => { openLogin(); setMobileMenuOpen(false); }}
+                    className="w-full py-2.5 rounded-xl bg-slate-900 text-white text-sm font-semibold flex items-center justify-center gap-2"
+                  >
+                    <LogIn className="w-4 h-4" /> Masuk
+                  </button>
+                  <button
+                    onClick={() => { openRegister(); setMobileMenuOpen(false); }}
+                    className="w-full py-2.5 rounded-xl bg-amber-500 text-slate-950 text-sm font-bold"
+                  >
+                    Daftar Akun Baru
+                  </button>
+                </>
+              )}
+            </div>
             <a 
               href="https://wa.me/628111188644"
               target="_blank"
@@ -290,7 +436,9 @@ export default function App() {
                       <Trophy className="w-5 h-5 text-slate-900" />
                     </div>
                     <div>
-                      <span className="block text-xs font-bold text-amber-400 uppercase tracking-wider">Progres Belajarmu</span>
+                      <span className="block text-xs font-bold text-amber-400 uppercase tracking-wider">
+                        {user ? `Progres ${user.name?.split(" ")[0] || "kamu"}` : "Progres Belajarmu"}
+                      </span>
                       <span className="block text-sm text-slate-300" data-testid="progress-count-text">{watchedCount} dari {totalVideos} video sudah ditonton</span>
                     </div>
                   </div>
@@ -323,6 +471,21 @@ export default function App() {
                     </button>
                   )}
                 </div>
+
+                {!user && !authLoading && (
+                  <div className="mt-4 pt-4 border-t border-white/10 flex items-center justify-between gap-3">
+                    <p className="text-xs text-amber-200 leading-relaxed flex-1">
+                      💡 <b>Login/daftar</b> supaya progresmu tersimpan permanen & bisa dipantau HCG Teams.
+                    </p>
+                    <button
+                      onClick={openLogin}
+                      className="shrink-0 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold flex items-center gap-1.5 transition"
+                      data-testid="progress-login-cta"
+                    >
+                      <LogIn className="w-3 h-3" /> Masuk
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -666,6 +829,9 @@ export default function App() {
           </div>
         </div>
       </footer>
+
+      <AuthModal open={authModalOpen} onClose={() => setAuthModalOpen(false)} defaultMode={authModalMode} />
+      <AdminDashboard open={adminOpen} onClose={() => setAdminOpen(false)} />
     </div>
   );
 }

@@ -28,3 +28,11 @@ The user wants to allow users to download CV and Cover Letter templates (`.rar` 
 - Navigation & footer links updated to include the new section.
 - Descriptions written in simple Indonesian, targeted at orphanage kids.
 - Existing 5-video CV tutorial + .rar downloads unchanged and working.
+
+## Update (Feb 2026) — Auth + Progress Tracking + Admin Dashboard
+- Email + password authentication (register/login/logout) via JWT httpOnly cookies (7-day session).
+- Per-user progress tracking synced to MongoDB `users.watched_videos` collection.
+- Admin dashboard modal accessible only to admin role — shows total users, watched count per user, progress %, and last-login timestamp.
+- Admin seeded on startup: `aryaputratama68@gmail.com` / `Quincy2108`.
+- Resend integration installed for admin notifications on register/login/video-mark.
+- NOTE: Resend test-mode currently restricts sending to the Resend account owner email only. To enable notifications to aryaputratama68@gmail.com, the user needs to verify a domain at resend.com/domains.
