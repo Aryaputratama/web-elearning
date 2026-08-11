@@ -2,32 +2,45 @@
 Covers auth, tracking, admin, and templates endpoints.
 """
 import os
+import sys
 import time
+from pathlib import Path
 import pytest
 import requests
+from dotenv import load_dotenv
+
+# Ensure backend/ is on sys.path so `from email_service import ...` works in tests
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+# Load backend .env so ADMIN_EMAIL/ADMIN_PASSWORD/MONGO_URL/DB_NAME are available
+load_dotenv(Path(__file__).parent.parent / ".env")
 
 BASE_URL = os.environ.get("REACT_APP_BACKEND_URL", "https://career-boost-410.preview.emergentagent.com").rstrip("/")
 API = f"{BASE_URL}/api"
 
-ADMIN_EMAIL = "aryaputratama68@gmail.com"
-ADMIN_PASSWORD = "Quincy2108"
+ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "aryaputratama68@gmail.com")
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD")
+if not ADMIN_PASSWORD:
+    pytest.skip("ADMIN_PASSWORD env var not set — regression tests need admin creds", allow_module_level=True)
 
-TS = int(time.time())
-TEST_EMAIL = f"testuser_{TS}@example.com"
-TEST_PASSWORD = "test1234"
+TS = int(time.time() * 1000)
+# Include xdist worker id so each parallel worker registers its own unique email
+_WORKER = os.environ.get("PYTEST_XDIST_WORKER", "solo")
+TEST_EMAIL = f"testuser_{TS}_{_WORKER}@example.com"
+TEST_PASSWORD = os.environ.get("TEST_USER_PASSWORD", "test1234")
 TEST_NAME = "TEST User Regression"
 
 
 @pytest.fixture(scope="module")
 def user_session():
     s = requests.Session()
-    # Ensure user exists and session is logged in (works across xdist workers)
     r = s.post(f"{API}/auth/register", json={
         "email": TEST_EMAIL, "password": TEST_PASSWORD, "name": TEST_NAME
     })
     if r.status_code == 400:
         # already exists - login instead
-        s.post(f"{API}/auth/login", json={"email": TEST_EMAIL, "password": TEST_PASSWORD})
+        r = s.post(f"{API}/auth/login", json={"email": TEST_EMAIL, "password": TEST_PASSWORD})
+    assert r.status_code == 200, f"user_session setup failed: {r.status_code} {r.text}"
     return s
 
 
@@ -77,6 +90,18 @@ class TestAuth:
         r = admin_session.get(f"{API}/auth/me")
         assert r.status_code == 200
         assert r.json()["user"]["role"] == "admin"
+
+    def test_logout_clears_cookies(self):
+        """Kept in TestAuth so xdist loadscope pins it to the same worker as user_session fixture."""
+        s = requests.Session()
+        r = s.post(f"{API}/auth/login", json={"email": TEST_EMAIL, "password": TEST_PASSWORD})
+        assert r.status_code == 200
+        assert s.get(f"{API}/auth/me").status_code == 200
+        r2 = s.post(f"{API}/auth/logout")
+        assert r2.status_code == 200
+        s.cookies.clear()
+        r3 = s.get(f"{API}/auth/me")
+        assert r3.status_code == 401
 
 
 # ---------- Tracking ----------
@@ -141,23 +166,6 @@ class TestAdmin:
     def test_admin_users_anonymous(self):
         r = requests.get(f"{API}/admin/users")
         assert r.status_code == 401
-
-
-# ---------- Logout ----------
-class TestLogout:
-    def test_logout_clears_cookies(self):
-        s = requests.Session()
-        r = s.post(f"{API}/auth/login", json={"email": TEST_EMAIL, "password": TEST_PASSWORD})
-        assert r.status_code == 200
-        # Verify me works
-        assert s.get(f"{API}/auth/me").status_code == 200
-        # Logout
-        r2 = s.post(f"{API}/auth/logout")
-        assert r2.status_code == 200
-        # Clear cookies manually since delete_cookie sends expires
-        s.cookies.clear()
-        r3 = s.get(f"{API}/auth/me")
-        assert r3.status_code == 401
 
 
 # ---------- Templates ----------

@@ -171,7 +171,9 @@ export default function App() {
       for (const vid of current) {
         try {
           await axios.post(`${API}/tracking/mark`, { video_id: vid, watched: false }, { withCredentials: true });
-        } catch {}
+        } catch (err) {
+          console.error(`Failed to unmark video ${vid}:`, err);
+        }
       }
       setUser({ ...user, watched_videos: [] });
     } else {
