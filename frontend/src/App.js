@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Toaster, toast } from "sonner";
 import { 
   FileText, Download, Sparkles, CheckCircle2, ArrowRight, 
-  BookOpen, Star, ShieldCheck, Zap, ExternalLink, Menu, X, Award, PlayCircle, MessageCircle, Send, HelpCircle, Video, Play
+  BookOpen, Star, ShieldCheck, Zap, ExternalLink, Menu, X, Award, PlayCircle, MessageCircle, Send, HelpCircle, Video, Play, Mic, UserCheck
 } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -48,6 +48,25 @@ const YOUTUBE_VIDEOS = [
     url: "https://youtu.be/4UIPG5zeiY4?si=pHIjzqzvT8fcJCau",
     embedUrl: "https://www.youtube.com/embed/4UIPG5zeiY4",
     description: "Persiapan akhir menjelang panggilan kerja dan cara percaya diri saat wawancara."
+  }
+];
+
+const INTERVIEW_VIDEOS = [
+  {
+    id: "iv1",
+    title: "Cara Memperkenalkan Diri Saat Wawancara Kerja",
+    url: "https://youtu.be/9WsRvH1BSJQ?si=oja4IkqYfgqr8FWe",
+    embedUrl: "https://www.youtube.com/embed/9WsRvH1BSJQ",
+    description: "Panduan mudah memperkenalkan diri di depan pewawancara supaya kesan pertama kamu positif dan mudah diingat oleh HRD.",
+    icon: "intro"
+  },
+  {
+    id: "iv2",
+    title: "Tips Menjawab Pertanyaan Wawancara dengan Percaya Diri",
+    url: "https://youtu.be/R3I3hm27G1U?si=sPnc7JLR01mapKVm",
+    embedUrl: "https://www.youtube.com/embed/R3I3hm27G1U",
+    description: "Belajar cara menjawab pertanyaan dari HRD dengan tenang, jujur, dan meyakinkan supaya kamu makin siap diterima kerja.",
+    icon: "answer"
   }
 ];
 
@@ -106,6 +125,9 @@ export default function App() {
             <a href="#tutorial-video" className="text-sm font-medium text-slate-700 hover:text-amber-600 transition-colors" data-testid="nav-video">
               🎥 Video Tutorial (5 Video)
             </a>
+            <a href="#tips-wawancara" className="text-sm font-medium text-slate-700 hover:text-amber-600 transition-colors" data-testid="nav-wawancara">
+              🎤 Tips Wawancara
+            </a>
             <a href="#download-section" className="text-sm font-medium text-slate-900 font-semibold bg-amber-500/10 px-4 py-2 rounded-xl text-amber-800 border border-amber-500/30" data-testid="nav-sumber-daya">
               📥 Unduh Template (.rar)
             </a>
@@ -141,6 +163,7 @@ export default function App() {
         {mobileMenuOpen && (
           <div className="md:hidden bg-[#FDFBF7] border-b border-amber-950/10 px-6 py-6 flex flex-col gap-4">
             <a href="#tutorial-video" onClick={() => setMobileMenuOpen(false)} className="text-base font-medium text-slate-800">🎥 5 Video Tutorial</a>
+            <a href="#tips-wawancara" onClick={() => setMobileMenuOpen(false)} className="text-base font-medium text-slate-800">🎤 Tips Wawancara Kerja</a>
             <a href="#download-section" onClick={() => setMobileMenuOpen(false)} className="text-base font-semibold text-amber-700">📥 Unduh Template .rar</a>
             <a href="#kontak-arya" onClick={() => setMobileMenuOpen(false)} className="text-base font-medium text-slate-800">💬 Tanya Kak Arya</a>
             <a 
@@ -357,6 +380,84 @@ export default function App() {
         </div>
       </section>
 
+      {/* Bagian Tips Wawancara Kerja (Section Baru) */}
+      <section id="tips-wawancara" className="py-24 bg-gradient-to-b from-[#F4F1EA] to-[#FDFBF7] border-t border-amber-950/10">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center max-w-3xl mx-auto mb-14">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 text-sm font-extrabold mb-4 shadow-sm">
+              <Mic className="w-5 h-5" />
+              <span>SECTION KHUSUS • TIPS WAWANCARA KERJA</span>
+            </div>
+            <h2 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight mb-4">
+              Siap Menghadapi Wawancara Kerja Pertamamu 🎤
+            </h2>
+            <p className="text-slate-600 text-lg leading-relaxed">
+              Setelah CV & Cover Letter siap, saatnya berlatih wawancara. Tonton 2 video singkat di bawah ini agar kamu <strong className="text-slate-900">percaya diri, tidak gugup,</strong> dan tahu apa yang harus dikatakan di depan HRD.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {INTERVIEW_VIDEOS.map((vid, idx) => (
+              <div
+                key={vid.id}
+                className="p-6 rounded-3xl bg-white border-2 border-emerald-500/20 shadow-xl hover:shadow-2xl hover:border-emerald-500/50 transition-all duration-300"
+                data-testid={`interview-video-card-${vid.id}`}
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500 text-white text-xs font-bold shadow-sm">
+                    {vid.icon === "intro" ? <UserCheck className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5" />}
+                    Bagian {idx + 1}
+                  </span>
+                  <span className="text-xs font-mono font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100">
+                    Video Wawancara
+                  </span>
+                </div>
+
+                <div className="relative aspect-video rounded-2xl overflow-hidden bg-black border border-slate-200 shadow-lg mb-5">
+                  <iframe
+                    src={vid.embedUrl}
+                    title={vid.title}
+                    className="w-full h-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  ></iframe>
+                </div>
+
+                <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mb-3 leading-snug">
+                  {vid.title}
+                </h3>
+                <p className="text-sm text-slate-600 leading-relaxed mb-5">
+                  {vid.description}
+                </p>
+
+                <a
+                  href={vid.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm transition-all shadow-md"
+                  data-testid={`interview-watch-yt-${vid.id}`}
+                >
+                  <ExternalLink className="w-4 h-4 text-emerald-400" />
+                  <span>Buka di YouTube</span>
+                </a>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-12 p-6 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex items-start gap-4 max-w-4xl mx-auto">
+            <div className="w-11 h-11 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-md">
+              <Sparkles className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="font-bold text-slate-900 mb-1">Tips dari Kak Arya</h4>
+              <p className="text-sm text-slate-700 leading-relaxed">
+                Latih dulu di depan cermin atau bareng teman panti. Ucapkan salam, sebutkan nama, umur, dan hobi dengan senyum. Ingat: <strong>HRD suka orang yang jujur dan bersemangat</strong>, bukan yang paling pintar bicara.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Bagian Kontak Tanya Kak Arya (08111188644) */}
       <section id="kontak-arya" className="py-20 bg-gradient-to-r from-amber-900 via-amber-950 to-slate-950 text-white">
         <div className="max-w-5xl mx-auto px-6">
@@ -439,6 +540,7 @@ export default function App() {
 
           <div className="flex items-center gap-6">
             <a href="#tutorial-video" className="hover:text-amber-600 transition-colors">Video Tutorial</a>
+            <a href="#tips-wawancara" className="hover:text-amber-600 transition-colors">Tips Wawancara</a>
             <a href="#download-section" className="hover:text-amber-600 transition-colors">Unduh Template</a>
             <a href="#kontak-arya" className="hover:text-amber-600 transition-colors">Kontak Kak Arya</a>
           </div>

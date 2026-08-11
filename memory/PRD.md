@@ -20,3 +20,11 @@ The user wants to allow users to download CV and Cover Letter templates (`.rar` 
 
 ## Backlog & Next Steps
 - Add user upload dashboard for admin template management.
+
+## Update (Feb 2026) — Tips Wawancara Section
+- Added new section "Tips Wawancara Kerja" (#tips-wawancara) with 2 embedded YouTube videos:
+  - Cara Memperkenalkan Diri Saat Wawancara Kerja (9WsRvH1BSJQ)
+  - Tips Menjawab Pertanyaan Wawancara dengan Percaya Diri (R3I3hm27G1U)
+- Navigation & footer links updated to include the new section.
+- Descriptions written in simple Indonesian, targeted at orphanage kids.
+- Existing 5-video CV tutorial + .rar downloads unchanged and working.
